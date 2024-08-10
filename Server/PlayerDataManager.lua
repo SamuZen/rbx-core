@@ -151,15 +151,6 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
             end
             broadcaster:destroy()
         end)
-
-        task.spawn(function()
-            while true do
-                task.wait(5)
-                
-                producer.addVersion(1)
-                --producer.addSecondVersion(1)
-            end
-        end)
         
     end)
 
