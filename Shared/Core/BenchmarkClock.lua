@@ -14,16 +14,16 @@ local BenchmarkClock: Class | ClassInstance = {}
 BenchmarkClock.__index = BenchmarkClock
 function BenchmarkClock.New(): ClassInstance
     local self = setmetatable({}, BenchmarkClock)
-    self.T = os:clock()
+    self.T = os.clock()
     return self
 end
 
 function BenchmarkClock:Reset()
-    self.T = os:clock()
+    self.T = os.clock()
 end
 
 function BenchmarkClock:GetDelta()
-    return self.T - os:clock()
+    return self.T - os.clock()
 end
 
 function BenchmarkClock:GetDeltaString(decimals)

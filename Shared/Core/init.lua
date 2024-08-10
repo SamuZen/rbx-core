@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 -- ### Core Modules
-local BenchmarkClock = require(ReplicatedStorage.Source.Modules.BenchmarkClock)
+local BenchmarkClock = require(script.BenchmarkClock)
 
 -- ### Modules
 local SecuredRemote = require(script.SecuredRemote)
