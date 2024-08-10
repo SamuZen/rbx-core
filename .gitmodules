@@ -4,3 +4,6 @@
 [submodule "ProfileService"]
 	path = ProfileService
 	url = https://github.com/MadStudioRoblox/ProfileService.git
+[submodule "Fusion"]
+	path = Fusion
+	url = https://github.com/dphfox/Fusion.git
