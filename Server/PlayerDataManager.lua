@@ -140,6 +140,18 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
             end
         end))
 
+        -- update profile service of changes
+        local function selectAll(state)
+            return state
+        end
+        producer:subscribe(selectAll, function(state: RootProducer.RootState, _)
+            if self.profiles[player] ~= nil then
+                self.profiles[player].Data = state
+            else
+                warn("State trying to update profile, but its missing!")
+            end
+        end)
+
         producer:applyMiddleware(broadcaster.middleware)
 
         --cleanup
