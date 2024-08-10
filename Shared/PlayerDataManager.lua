@@ -73,7 +73,6 @@ function PlayerDataManager.Init()
     -- connect receiver to remote event
     local PlayerDataManagerNet = Net.Get("PlayerDataManager")
     PlayerDataManagerNet.re.Broadcaster.OnClientEvent:Connect(function(actions)
-        print("Player received broadcast:", actions)
         receiver:dispatch(actions)
     end)
 
