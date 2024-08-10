@@ -122,16 +122,12 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
     end)
 
     self.signals.playerProfileLoaded:Connect(function(player: Player, data: any)
-        local producer = RootProducer.createProducer(data)
+
+        local producer = RootProducer.createRootProducer(data)
         self.producers[player] = producer
-        -- re-create all shared slices for the broadcaster
-        local broadcastProducers = {}
-        for _, sliceMod in slices do
-            table.insert(broadcastProducers, sliceMod.createProducer(data))
-        end
 
         local broadcaster = Reflex.createBroadcaster({
-            producers = broadcastProducers,
+            producers = RootProducer.createProducers(data),
             dispatch = function(_player, actions)
                 self.Client.Broadcaster.remote:FireClient(_player, actions)
             end
@@ -158,7 +154,9 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
 
         task.spawn(function()
             while true do
-                task.wait(10)
+                task.wait(5)
+                
+                producer.addVersion(1)
                 --producer.addSecondVersion(1)
             end
         end)
