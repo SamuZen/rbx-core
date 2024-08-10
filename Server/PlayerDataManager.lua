@@ -13,7 +13,6 @@ local Reflex = require(ReplicatedStorage.Source.Reflex)
 
 -- ### Packages
 local Signal = require(ReplicatedStorage.Source.Packages.signal)
---local TableUtil = require(ReplicatedStorage.Source.Packages["table-util"])
 local Trove = require(ReplicatedStorage.Source.Packages.trove)
 
 local RootProducer = require(ReplicatedStorage.Source.Shared.PlayerData.Producer)
@@ -166,6 +165,10 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
         
     end)
 
+end
+
+function PlayerDataManager:PlayerProducer(player: Player): RootProducer.RootProducer
+    return self.producers[player]
 end
 
 function PlayerDataManager:GetPlayerProducerSync(player): RootProducer.RootProducer
