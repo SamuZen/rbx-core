@@ -39,27 +39,9 @@ export type BaseSlice = {
     createProducer: (data: any) -> any,
 }
 
-local function GetSlices(): {[string]: BaseSlice}
-    local slices = {}
-    local slicesFolder = ReplicatedStorage.Source.Shared.PlayerData.Slices
-    for _, child in slicesFolder:GetChildren() do
-        if child.Name == "Producer" then continue end
-        slices[child.Name] = require(child)
-    end
-    return slices
-end
-
-local function AssembleProfileTemplate(slices :{[string]: BaseSlice}): table
-    local template = {}
-    for sliceName, sliceModule in slices do
-        template[sliceName] = sliceModule.template
-    end
-    return template
-end
-
 function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) -> table)
-    local slices = GetSlices()
-    local profileTemplate = AssembleProfileTemplate(slices)
+
+    local profileTemplate = RootProducer.createDataTemplate()
 
     local playerProfileStore = ProfileService.GetProfileStore(databaseName, profileTemplate)
     
@@ -86,7 +68,9 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
         if loadMiddleware ~= nil then
             profile = loadMiddleware(profile)
         end
-        
+
+        profile.Data = RootProducer.fixUserData(profile.Data)
+
         -- if player leave or profile is loaded on another server
         profile:ListenToRelease(function()
             player:Kick("Your profile has been loaded remotely. Please rejoin")
@@ -104,10 +88,10 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
 
         --cleanup
         self.troves[player]:Add(function()
-            local profile = self.profiles[player]
-            if profile ~= nil then
+            local _profile = self.profiles[player]
+            if _profile ~= nil then
                 self.signals.beforePlayerRemoving:Fire(player)
-                profile:Release()
+                _profile:Release()
             end
             self.profiles[player] = nil
         end)
@@ -121,7 +105,6 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
     end)
 
     self.signals.playerProfileLoaded:Connect(function(player: Player, data: any)
-
         local producer = RootProducer.createRootProducer(data)
         self.producers[player] = producer
 
