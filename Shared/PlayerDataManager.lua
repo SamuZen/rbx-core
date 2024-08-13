@@ -47,23 +47,12 @@ function PlayerDataManager.Init()
     if myData == nil then
         error("ERROR: Failed to Initialize client Data! Talk to the devs if this happens again!")
     end
-
+    
     -- create local producer
     self.producer = RootProducer.createRootProducer(myData)
 
     local scope = Fusion.scoped(Fusion)
     self.state = RootProducer.createFusionState(scope, self.producer)
-
-    Fusion.Hydrate(scope, workspace.PlayerDataManager.SurfaceGui.TextLabel) {
-        Text = self.state.template.versionString
-    }
-
-    -- producer:subscribe(function (state: producer.RootState)
-    --     return state.version.secondVersion
-    -- end,
-    -- function(version)
-    --     print("The second version ON CLIENT is now: " .. version)
-    -- end)
 
     -- create action receiver
     local receiver = Reflex.createBroadcastReceiver({
@@ -78,7 +67,6 @@ function PlayerDataManager.Init()
 
     -- connect receiver to producer
     self.producer:applyMiddleware(receiver.middleware)
-
 end
 
 function PlayerDataManager.Start()
