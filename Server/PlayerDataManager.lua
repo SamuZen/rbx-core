@@ -21,6 +21,7 @@ local RootProducer = require(ReplicatedStorage.Source.Shared.PlayerData.Producer
 local PlayerDataManager = {
     Name = "PlayerDataManager",
     signals = {
+        playerStateCreated = Signal.new(),
         playerProfileLoaded = Signal.new(),
         playerProfileRemoved = Signal.new(),
         beforePlayerRemoving = Signal.new(),
@@ -154,6 +155,7 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
             broadcaster:destroy()
         end)
         
+        self.signals.playerStateCreated:Fire(player)
     end)
 
 end
