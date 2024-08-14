@@ -10,6 +10,7 @@ local Player = require(ReplicatedStorage.Source.Modules.Player)
 local ProfileService = require(ServerStorage.Source.ProfileService)
 local Core = require(ReplicatedStorage.Source.Modules.Core)
 local Reflex = require(ReplicatedStorage.Source.Reflex)
+local Fusion = require(ReplicatedStorage.Source.Fusion)
 
 -- ### Packages
 local Signal = require(ReplicatedStorage.Source.Packages.signal)
@@ -30,6 +31,7 @@ local PlayerDataManager = {
     },
     profiles = {},
     producers = {} :: {[Player]: RootProducer.RootProducer},
+    states = {} :: {[Player]: RootProducer.RootFusionState},
     troves = {},
 }
 local self = PlayerDataManager
@@ -136,8 +138,14 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
 
         producer:applyMiddleware(broadcaster.middleware)
 
+        local scope = Fusion.scoped(Fusion)
+        self.states[player] = RootProducer.createFusionState(scope, producer)
+
         --cleanup
         self.troves[player]:Add(function()
+            scope:doCleanup()
+            self.states[player] = nil
+
             local _producer = self.producers[player]
             if _producer ~= nil then
                 _producer:destroy()
@@ -152,6 +160,14 @@ end
 
 function PlayerDataManager:PlayerProducer(player: Player): RootProducer.RootProducer
     return self.producers[player]
+end
+
+function PlayerDataManager:PlayerFState(player: Player): RootProducer.RootFusionState
+    return self.states[player]
+end
+
+function PlayerDataManager:Peek(value: Fusion.StateObject<any>)
+    return Fusion.peek(value)
 end
 
 function PlayerDataManager:GetPlayerProducerSync(player): RootProducer.RootProducer
