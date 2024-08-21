@@ -26,7 +26,7 @@ function PlayerDataManager.Init()
         local success
         local data
         local errCount = 0
-        while not success and errCount < 5 do
+        while not success and errCount < 15 do
             success, data = pcall(function()
                 return Net.InvokeServer("PlayerDataManager.HandShake")
             end)
@@ -36,7 +36,7 @@ function PlayerDataManager.Init()
                 print("hand shake failed!")
                 print(data)
                 errCount += 1
-                task.wait(0.5)
+                task.wait(1)
                 print('trying again ', errCount)
             end
         end
