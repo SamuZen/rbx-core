@@ -26,6 +26,7 @@ function EnvironmentIdentifier.Setup(map: AmbientIdMapData)
                     Id = id,
                     Key = key,
                 }
+                map.CurrentEnv = key
                 found = true
                 break
             end
@@ -37,6 +38,7 @@ function EnvironmentIdentifier.Setup(map: AmbientIdMapData)
             Id = currentPlaceId,
             Key = map.DefaultEnv,
         }
+        map.CurrentEnv = map.DefaultEnv
     end
     warn(`AMBIENT: {EnvironmentIdentifier.CurrentEnvironment.Key} - PLACEID:{EnvironmentIdentifier.CurrentEnvironment.Id}`)
 end
