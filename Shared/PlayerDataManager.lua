@@ -2,7 +2,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- ### Modules
-local Reflex = require(ReplicatedStorage.Source.Reflex)
+local Reflex = require(ReplicatedStorage.Source.Packages.reflex)
 
 -- ### Packages
 local Fusion = require(ReplicatedStorage.Source.Fusion)
