@@ -6,9 +6,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 -- ### Modules
-local Player = require(ReplicatedStorage.Source.Modules.Player)
+local Player = require(ReplicatedStorage.Source.CoreModules.Player)
 local ProfileService = require(ServerStorage.Source.ProfileService)
-local Core = require(ReplicatedStorage.Source.Modules.Core)
+local Core = require(ReplicatedStorage.Source.CoreModules.Core)
 local Reflex = require(ReplicatedStorage.Source.Reflex)
 
 -- ### Packages

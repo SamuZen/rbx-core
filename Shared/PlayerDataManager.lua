@@ -10,7 +10,7 @@ local Fusion = require(ReplicatedStorage.Source.Fusion)
 local RootProducer = require(ReplicatedStorage.Source.Shared.PlayerData.Producer)
 
 -- ### Modules
-local Net = require(ReplicatedStorage.Source.Modules.Net)
+local Net = require(ReplicatedStorage.Source.CoreModules.Net)
 
 local PlayerDataManager = {
     Name = "PlayerDataManager",

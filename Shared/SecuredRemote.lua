@@ -42,7 +42,7 @@ function SecuredRemote.new(name, namespace)
 	}, SecuredRemote)
 
 	if name ~= nil and namespace ~= nil then
-		require(ReplicatedStorage.Source.Modules.Core).HandleSecuredRemote(self, namespace, name)
+		require(ReplicatedStorage.Source.CoreModules.Core).HandleSecuredRemote(self, namespace, name)
 	end
 
 	return self

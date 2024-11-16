@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- ### Modules
-local Weld = require(ReplicatedStorage.Source.Modules.Weld)
+local Weld = require(ReplicatedStorage.Source.CoreModules.Weld)
 
 local Character = {}
 Character.__index = Character
