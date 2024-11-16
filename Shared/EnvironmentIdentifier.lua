@@ -1,52 +1,55 @@
 local EnvironmentIdentifier = {}
 export type AmbientIdMapData = {
-    Environments: {[string]: number | {number}},
-    DefaultEnv: string,
+    environments: {[string]: number},
+    defaultEnv: string,
+    defaultPlace: string,
 }
 
-EnvironmentIdentifier.CurrentEnvironment = nil :: {Key: string, Id: number} | nil
-EnvironmentIdentifier.Environments = {}
+EnvironmentIdentifier.currentEnvironment = nil :: {placeName:string, environment: string, placeId: number} | nil
+EnvironmentIdentifier.environmentData = {}
 
 function EnvironmentIdentifier.Setup(map: AmbientIdMapData)
     local currentPlaceId = game.PlaceId
     -- find current
 
     local found = false
-    for key, placeId in map.Environments do
-        local ids
-        if typeof(placeId) == "number" then
-            ids = {placeId}
-        else
-            ids = placeId
-        end
-
-        for _, id in ids do
+    for envName, envData in map.mapEnvPlaceId do
+        for placeName, id in envData do
             if currentPlaceId == id then
-                EnvironmentIdentifier.CurrentEnvironment = {
-                    Id = id,
-                    Key = key,
+                EnvironmentIdentifier.currentEnvironment = {
+                    placeId = id,
+                    environment = envName,
+                    placeName = placeName,
                 }
                 found = true
+
+                EnvironmentIdentifier.environmentData = envData
+
                 break
             end
         end
     end
 
     if not found then
-        EnvironmentIdentifier.CurrentEnvironment = {
-            Id = currentPlaceId,
-            Key = map.DefaultEnv,
+        EnvironmentIdentifier.currentEnvironment = {
+            placeId = currentPlaceId,
+            environment = map.defaultEnv,
+            placeName = map.defaultPlace,
         }
     end
-    warn(`AMBIENT: {EnvironmentIdentifier.CurrentEnvironment.Key} - PLACEID:{EnvironmentIdentifier.CurrentEnvironment.Id}`)
+    warn(`AMBIENT: {EnvironmentIdentifier.currentEnvironment.environment} - PLACE: {EnvironmentIdentifier.currentEnvironment.placeName} ({EnvironmentIdentifier.currentEnvironment.placeId})`)
 end
 
-function EnvironmentIdentifier.IsKey(key: string)
-    return EnvironmentIdentifier.CurrentEnvironment.Key == key
+function EnvironmentIdentifier.IsEnv(env: string): boolean
+    return EnvironmentIdentifier.currentEnvironment.environment == env
 end
 
-function EnvironmentIdentifier.IsId(id: number)
-    return EnvironmentIdentifier.CurrentEnvironment.Id == id
+function EnvironmentIdentifier.IsId(id: number): boolean
+    return EnvironmentIdentifier.currentEnvironment.placeId == id
+end
+
+function EnvironmentIdentifier.GetPlaceId(place: string): number
+    return EnvironmentIdentifier.environmentData[place]
 end
 
 return EnvironmentIdentifier
