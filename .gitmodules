@@ -1,6 +1,3 @@
-[submodule "reflex"]
-	path = reflex
-	url = https://github.com/SamuZen/reflex.git
 [submodule "ProfileService"]
 	path = ProfileService
 	url = https://github.com/MadStudioRoblox/ProfileService.git
