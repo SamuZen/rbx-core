@@ -52,4 +52,8 @@ function EnvironmentIdentifier.GetPlaceId(place: string): number
     return EnvironmentIdentifier.environmentData[place]
 end
 
+function EnvironmentIdentifier.Select(data: {[string]: any})
+    return data[EnvironmentIdentifier.currentEnvironment.environment]
+end
+
 return EnvironmentIdentifier
