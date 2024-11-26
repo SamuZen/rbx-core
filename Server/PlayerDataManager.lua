@@ -104,8 +104,21 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
         self.signals.playerProfileRemoved:Fire(player)
     end)
 
+    self.signals.beforePlayerRemoving:Connect(function(player: Player)
+        pcall(function()
+            if self.profiles[player].Data.account ~= nil then
+                self.profiles[player].Data.account.lastExit = tick()
+                local sessionDuration = math.round(
+                    self.profiles[player].Data.account.lastExit -
+                    self.profiles[player].Data.account.lastJoin
+                )
+                self.profiles[player].Data.account.playTime += sessionDuration
+            end
+        end)
+    end)
+
     self.signals.playerProfileLoaded:Connect(function(player: Player, data: any)
-        local producer = RootProducer.createRootProducer(data)
+        local producer = RootProducer.createRootProducer(data) :: RootProducer.RootProducer
         self.producers[player] = producer
 
         local broadcaster = Reflex.createBroadcaster({
@@ -145,7 +158,13 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
             end
             broadcaster:destroy()
         end)
-        
+
+        pcall(function()
+            producer.increaseLoginCount()
+            producer.setLastJoin()
+            producer.setIsRobloxVip(player.MembershipType == Enum.MembershipType.Premium)
+        end)
+    
     end)
 
 end
