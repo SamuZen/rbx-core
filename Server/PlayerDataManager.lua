@@ -159,12 +159,98 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
             broadcaster:destroy()
         end)
 
+        -- account base data
         pcall(function()
             producer.increaseLoginCount()
             producer.setLastJoin()
             producer.setIsRobloxVip(player.MembershipType == Enum.MembershipType.Premium)
         end)
+
+        -- check gamepass
+        pcall(function()
+            local gamepassData = require(ReplicatedStorage.Source.Shared.Database.Gamepass)
+            local MarketplaceService = game:GetService("MarketplaceService")
+            local passes = {}
+            producer.setOwnedGamePasses({})
+            
+            for localId, data in gamepassData.Passes do
+                print(`checking if user has pass: {localId}`)
+                
+                local hasPass = false
+                local success, message
+                local try = 0
+                -- Check if user already owns the pass
+
+                while not success and try < 10 do
+                    success, message = pcall(function()
+                        hasPass = MarketplaceService:UserOwnsGamePassAsync(player.UserId, data.id)
+                    end)
+                    if not success then
+                        task.wait(0.5)
+                        try += 1
+                    end
+                end
+
+                if not success then
+                    -- Issue a warning and exit the function
+                    error("Error while checking if player has pass: " .. tostring(message))
+                    return
+                end
+
+                if hasPass then
+                    -- Assign user the ability or bonus related to the pass
+                    print(player.Name .. " owns the Pass with ID " .. data.id)
+                    passes[data.id] = true
+                end
+
+            end
+        
+            producer.setOwnedGamePasses(passes)
+        end)
     
+        -- check badges
+        pcall(function()
+            local badgesData = require(ReplicatedStorage.Source.Shared.Database.Badge)
+            local BadgeService = game:GetService("BadgeService")
+            local badges = {}
+            producer.setOwnedBadges({})
+            
+            for localId, data in badgesData.Badges do
+                print(`checking if user has pass: {localId}`)
+                
+                BadgeService:AwardBadge(player.UserId, data.id)
+
+                local has = false
+                local success, message
+                local try = 0
+                -- Check if user already owns the pass
+
+                while not success and try < 10 do
+                    success, message = pcall(function()
+                        has = BadgeService:UserHasBadgeAsync(player.UserId, data.id)
+                    end)
+                    if not success then
+                        task.wait(0.5)
+                        try += 1
+                    end
+                end
+
+                if not success then
+                    -- Issue a warning and exit the function
+                    error("Error while checking if player has badge: " .. tostring(message))
+                    return
+                end
+
+                if has then
+                    -- Assign user the ability or bonus related to the pass
+                    print(player.Name .. " owns the Badge with ID " .. data.id)
+                    badges[data.id] = true
+                end
+
+            end
+        
+            producer.setOwnedBadges(badges)
+        end)
     end)
 
 end
