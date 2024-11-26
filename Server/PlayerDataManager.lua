@@ -23,6 +23,7 @@ local PlayerDataManager = {
         playerProfileLoaded = Signal.new(),
         playerProfileRemoved = Signal.new(),
         beforePlayerRemoving = Signal.new(),
+        playerDataLoaded = Signal.new(),
     },
     Client = {
         Broadcaster = Core.SecuredRemote.new(),
@@ -251,6 +252,8 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
         
             producer.setOwnedBadges(badges)
         end)
+
+        self.signals.playerDataLoaded:Fire(player)
     end)
 
 end
