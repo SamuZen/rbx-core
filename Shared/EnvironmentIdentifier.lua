@@ -7,10 +7,12 @@ export type AmbientIdMapData = {
 
 EnvironmentIdentifier.currentEnvironment = nil :: {placeName:string, environment: string, placeId: number} | nil
 EnvironmentIdentifier.environmentData = {}
+EnvironmentIdentifier.envData = nil
 
 function EnvironmentIdentifier.Setup(map: AmbientIdMapData)
     local currentPlaceId = game.PlaceId
     -- find current
+    EnvironmentIdentifier.envData = map
 
     local found = false
     for envName, envData in map.mapEnvPlaceId do
@@ -54,6 +56,10 @@ end
 
 function EnvironmentIdentifier.Select(data: {[string]: any})
     return data[EnvironmentIdentifier.currentEnvironment.environment]
+end
+
+function EnvironmentIdentifier.GetPlaceIdWithName(name: string): number
+	return EnvironmentIdentifier.envData.mapEnvPlaceId[EnvironmentIdentifier.currentEnvironment.environment][name]
 end
 
 return EnvironmentIdentifier
