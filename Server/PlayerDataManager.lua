@@ -37,6 +37,7 @@ local PlayerDataManager = {
     states = {} :: {[Player]: RootProducer.RootFusionState},
     scopes = {},
     troves = {},
+    peek = Fusion.peek,
 }
 local self = PlayerDataManager
 
