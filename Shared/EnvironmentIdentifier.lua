@@ -9,6 +9,9 @@ EnvironmentIdentifier.currentEnvironment = nil :: {placeName:string, environment
 EnvironmentIdentifier.environmentData = {}
 EnvironmentIdentifier.envData = nil
 
+local setuped = false
+local setupedEvent = Instance.new("BindableEvent")
+
 function EnvironmentIdentifier.Setup(map: AmbientIdMapData)
     local currentPlaceId = game.PlaceId
     -- find current
@@ -39,26 +42,33 @@ function EnvironmentIdentifier.Setup(map: AmbientIdMapData)
             placeName = map.defaultPlace,
         }
     end
-    warn(`AMBIENT: {EnvironmentIdentifier.currentEnvironment.environment} - PLACE: {EnvironmentIdentifier.currentEnvironment.placeName} ({EnvironmentIdentifier.currentEnvironment.placeId})`)
+    print(`AMBIENT: {EnvironmentIdentifier.currentEnvironment.environment} - PLACE: {EnvironmentIdentifier.currentEnvironment.placeName} ({EnvironmentIdentifier.currentEnvironment.placeId})`)
+	setuped = true
+	setupedEvent:Fire()
 end
 
 function EnvironmentIdentifier.IsEnv(env: string): boolean
+	if not setuped then setupedEvent.Event:Wait() end
     return EnvironmentIdentifier.currentEnvironment.environment == env
 end
 
 function EnvironmentIdentifier.IsId(id: number): boolean
+	if not setuped then setupedEvent.Event:Wait() end
     return EnvironmentIdentifier.currentEnvironment.placeId == id
 end
 
 function EnvironmentIdentifier.GetPlaceId(place: string): number
+	if not setuped then setupedEvent.Event:Wait() end
     return EnvironmentIdentifier.environmentData[place]
 end
 
 function EnvironmentIdentifier.Select(data: {[string]: any})
+	if not setuped then setupedEvent.Event:Wait() end
     return data[EnvironmentIdentifier.currentEnvironment.environment]
 end
 
 function EnvironmentIdentifier.GetPlaceIdWithName(name: string): number
+	if not setuped then setupedEvent.Event:Wait() end
 	return EnvironmentIdentifier.envData.mapEnvPlaceId[EnvironmentIdentifier.currentEnvironment.environment][name]
 end
 
