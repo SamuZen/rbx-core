@@ -3,14 +3,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- ### Modules
 local Reflex = require(ReplicatedStorage.Source.Packages.reflex)
-
--- ### Packages
 local Fusion = require(ReplicatedStorage.Source.Fusion)
+local Net = require(ReplicatedStorage.Source.CoreModules.Net)
 
 local RootProducer = require(ReplicatedStorage.Source.Shared.PlayerData.Producer)
-
--- ### Modules
-local Net = require(ReplicatedStorage.Source.CoreModules.Net)
 
 local PlayerDataManager = {
     Name = "PlayerDataManager",

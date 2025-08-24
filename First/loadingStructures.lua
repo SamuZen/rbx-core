@@ -1,26 +1,30 @@
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 
-local loadingStructures = {}
+local LoadingStructures = {}
 
 -- ### Initialization data
 
-loadingStructures.isClientInitialized = Instance.new("BoolValue")
-loadingStructures.isClientInitialized.Name = 'isClientInitialized'
-loadingStructures.isClientInitialized.Value = false
-loadingStructures.isClientInitialized.Parent = ReplicatedFirst
+LoadingStructures.isClientInitialized = Instance.new("BoolValue")
+LoadingStructures.isClientInitialized.Name = 'isClientInitialized'
+LoadingStructures.isClientInitialized.Value = false
+LoadingStructures.isClientInitialized.Parent = ReplicatedFirst
 
-loadingStructures.clientInitialized = Instance.new("BindableEvent")
-loadingStructures.clientInitialized.Name = "clientInitialized"
-loadingStructures.clientInitialized.Parent = ReplicatedFirst
+LoadingStructures.clientInitialized = Instance.new("BindableEvent")
+LoadingStructures.clientInitialized.Name = "clientInitialized"
+LoadingStructures.clientInitialized.Parent = ReplicatedFirst
 
 -- ### Loading data
 
-loadingStructures.loadingPercentage = Instance.new("NumberValue")
-loadingStructures.loadingPercentage.Name = 'loadingPercentage'
-loadingStructures.loadingPercentage.Parent = ReplicatedFirst
+LoadingStructures.loadingPercentage = Instance.new("NumberValue")
+LoadingStructures.loadingPercentage.Name = 'loadingPercentage'
+LoadingStructures.loadingPercentage.Parent = ReplicatedFirst
 
-loadingStructures.loadingDescription = Instance.new("StringValue")
-loadingStructures.loadingDescription.Name = 'loadingDescription'
-loadingStructures.loadingDescription.Parent = ReplicatedFirst
+LoadingStructures.loadingDescription = Instance.new("StringValue")
+LoadingStructures.loadingDescription.Name = 'loadingDescription'
+LoadingStructures.loadingDescription.Parent = ReplicatedFirst
 
-return loadingStructures
+function LoadingStructures.SetDescription(description)
+    LoadingStructures.loadingDescription.Value = description
+end
+
+return LoadingStructures
