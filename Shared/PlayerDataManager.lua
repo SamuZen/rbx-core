@@ -27,13 +27,13 @@ function PlayerDataManager.Init()
                 return Net.InvokeServer("PlayerDataManager.HandShake")
             end)
             if success then
-                print("hand shake success!")
+                --print("hand shake success!")
             else
-                print("hand shake failed!")
-                print(data)
+                --print("hand shake failed!")
+                --print(data)
                 errCount += 1
                 task.wait(1)
-                print('trying again ', errCount)
+                --print('trying again ', errCount)
             end
         end
         if not success then return end

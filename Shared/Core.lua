@@ -92,7 +92,7 @@ function Core.Initialize(initialization, skipInitStart)
     -- require
     local scripts = {}
 
-    warn("requiring " .. clock:GetDeltaString(3))
+    --warn("requiring " .. clock:GetDeltaString(3))
     for _, file in initialization do
         Core.Log(file.Name)
         local success, result = pcall(function()
@@ -107,7 +107,7 @@ function Core.Initialize(initialization, skipInitStart)
 
     -- custom init
     if RunService:IsServer() then
-        warn("Pre-Init Net" .. clock:GetDeltaString(3))
+        --warn("Pre-Init Net" .. clock:GetDeltaString(3))
         for _, file in initialization do
             local scriptModule = scripts[file.Name]
             if scriptModule.Client ~= nil then
@@ -136,7 +136,7 @@ function Core.Initialize(initialization, skipInitStart)
 
     if not skipInitStart then
         -- init
-        warn("Init " .. clock:GetDeltaString(3))
+        --warn("Init " .. clock:GetDeltaString(3))
         for _, file in initialization do
             if scripts[file.Name] ~= nil and scripts[file.Name].Init ~= nil then
                 Core.Log(file.Name)
@@ -145,7 +145,7 @@ function Core.Initialize(initialization, skipInitStart)
         end
 
         -- start
-        warn("Start " .. clock:GetDeltaString(3))
+        --warn("Start " .. clock:GetDeltaString(3))
         for _, file in initialization do
             task.spawn(function()
                 if scripts[file.Name] ~= nil and scripts[file.Name].Start ~= nil then

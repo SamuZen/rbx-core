@@ -42,7 +42,7 @@ function EnvironmentIdentifier.Setup(map: AmbientIdMapData)
             placeName = map.defaultPlace,
         }
     end
-    print(`AMBIENT: {EnvironmentIdentifier.currentEnvironment.environment} - PLACE: {EnvironmentIdentifier.currentEnvironment.placeName} ({EnvironmentIdentifier.currentEnvironment.placeId})`)
+    --print(`AMBIENT: {EnvironmentIdentifier.currentEnvironment.environment} - PLACE: {EnvironmentIdentifier.currentEnvironment.placeName} ({EnvironmentIdentifier.currentEnvironment.placeId})`)
 	setuped = true
 	setupedEvent:Fire()
 end
