@@ -13,6 +13,10 @@ LoadingStructures.clientInitialized = Instance.new("BindableEvent")
 LoadingStructures.clientInitialized.Name = "clientInitialized"
 LoadingStructures.clientInitialized.Parent = ReplicatedFirst
 
+LoadingStructures.dataLoaded = Instance.new("BindableEvent")
+LoadingStructures.dataLoaded.Name = "dataLoaded"
+LoadingStructures.dataLoaded.Parent = ReplicatedFirst
+
 -- ### Loading data
 
 LoadingStructures.loadingPercentage = Instance.new("NumberValue")
