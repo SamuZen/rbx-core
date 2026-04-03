@@ -182,12 +182,12 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
 
         -- check gamepass
         pcall(function()
-            local gamepassData = require(ReplicatedStorage.Source.Shared.Database.Gamepass)
+            local gamepassData = require(ReplicatedStorage.Source.Shared.Database.MarketPlace)
             local MarketplaceService = game:GetService("MarketplaceService")
             local passes = {}
             producer.setOwnedGamePasses({})
             
-            for localId, data in gamepassData.Passes do
+            for localId, data in gamepassData.GamePass do
                 print(`checking if user has pass: {localId}`)
                 
                 local hasPass = false
@@ -214,7 +214,7 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
                 if hasPass then
                     -- Assign user the ability or bonus related to the pass
                     print(player.Name .. " owns the Pass with ID " .. data.id)
-                    passes[data.id] = true
+                    passes[localId] = true
                 end
 
             end
