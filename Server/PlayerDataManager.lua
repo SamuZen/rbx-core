@@ -63,12 +63,35 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
     Player.onPlayerAdded(function(player)
         self.troves[player] = Trove.new()
 
-        local profile = playerProfileStore:LoadProfileAsync(`Player_{player.UserId}`, "ForceLoad")
+        local profileKey = `Player_{player.UserId}`
+        local rollbackResults = RootProducer.checkAndGetProfileToRollback(playerProfileStore, profileKey)
+        local resetData = false
+
+        if rollbackResults.needRollback then
+            if rollbackResults.profileToRollback == nil then
+                -- no valid profile to rollback, lets set the template
+                warn("No valid profile to rollback, resetting data!")
+                resetData = true
+            else
+                warn("Using rollback profile!")
+                -- we have a valid profile to rollback, lets load it
+                rollbackResults.profileToRollback:ClearGlobalUpdates()
+                rollbackResults.profileToRollback:OverwriteAsync()
+            end
+        else
+            warn("No rollback needed, loading profile!")
+        end
+
+        local profile = playerProfileStore:LoadProfileAsync(profileKey, "ForceLoad")
+
         if profile == nil then
             player:Kick("Failed to load saved data. Please rejoin")
-            profile:Release()
             clearPlayer(player)
             return
+        end
+
+        if resetData then
+            profile.Data = RootProducer.createDataTemplate()
         end
 
         -- fix save
@@ -80,7 +103,6 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
         if RunService:IsStudio() then
             profile.Data = RootProducer.studioModifyUserData(profile.Data)
         end
-
         profile.Data = RootProducer.fixUserData(profile.Data)
 
         -- if player leave or profile is loaded on another server
