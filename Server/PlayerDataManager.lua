@@ -3,6 +3,7 @@
 -- ### Roblox Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
 -- ### Modules
@@ -74,6 +75,10 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
         profile:Reconcile()
         if loadMiddleware ~= nil then
             profile = loadMiddleware(profile)
+        end
+
+        if RunService:IsStudio() then
+            profile.Data = RootProducer.studioModifyUserData(profile.Data)
         end
 
         profile.Data = RootProducer.fixUserData(profile.Data)
