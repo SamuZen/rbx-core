@@ -18,6 +18,7 @@ local Fusion = require(ReplicatedStorage.Source.Fusion)
 -- ### Packages
 local Signal = require(ReplicatedStorage.Source.Packages.signal)
 local Trove = require(ReplicatedStorage.Source.Packages.trove)
+local TableUtil = require(ReplicatedStorage.Source.Packages["table-util"])
 
 local RootProducer = require(ReplicatedStorage.Source.Shared.PlayerData.Producer)
 
@@ -64,34 +65,34 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
         self.troves[player] = Trove.new()
 
         local profileKey = `Player_{player.UserId}`
-        local rollbackResults = RootProducer.checkAndGetProfileToRollback(playerProfileStore, profileKey)
-        local resetData = false
-
-        if rollbackResults.needRollback then
-            if rollbackResults.profileToRollback == nil then
-                -- no valid profile to rollback, lets set the template
-                warn("No valid profile to rollback, resetting data!")
-                resetData = true
-            else
-                warn("Using rollback profile!")
-                -- we have a valid profile to rollback, lets load it
-                rollbackResults.profileToRollback:ClearGlobalUpdates()
-                rollbackResults.profileToRollback:OverwriteAsync()
-            end
-        else
-            warn("No rollback needed, loading profile!")
-        end
 
         local profile = playerProfileStore:LoadProfileAsync(profileKey, "ForceLoad")
-
         if profile == nil then
             player:Kick("Failed to load saved data. Please rejoin")
             clearPlayer(player)
             return
         end
 
-        if resetData then
-            profile.Data = RootProducer.createDataTemplate()
+        -- check if actually need a rollback before checking history
+        local needsRollback = RootProducer.doesCurrentProfileNeedRollback(profile)
+
+        if needsRollback then
+            local rollbackQueryResult = RootProducer.getLatestValidProfile(playerProfileStore, profileKey)
+            
+            if rollbackQueryResult.status == RootProducer.RollbackQueryStatus.FOUND_VALID_PROFILE then
+                local latestValidProfile = rollbackQueryResult.profile
+                profile.Data = TableUtil.Copy(latestValidProfile.Data, true)
+                profile:Save()
+
+            elseif rollbackQueryResult.status == RootProducer.RollbackQueryStatus.NO_VALID_PROFILE_FOUND then
+                profile.Data = TableUtil.Copy(RootProducer.createDataTemplate(), true)
+                profile:Save()
+
+            elseif rollbackQueryResult.status == RootProducer.RollbackQueryStatus.QUERY_FAILED then
+                player:Kick("Failed fixing your save data, please rejoin")
+                clearPlayer(player)
+                return
+            end
         end
 
         -- fix save
@@ -104,6 +105,11 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
             profile.Data = RootProducer.studioModifyUserData(profile.Data)
         end
         profile.Data = RootProducer.fixUserData(profile.Data)
+
+        -- add a variable to get a reward later 
+        if needsRollback then
+            profile.Data.general.rollbackReward += 1
+        end
 
         -- if player leave or profile is loaded on another server
         profile:ListenToRelease(function()
