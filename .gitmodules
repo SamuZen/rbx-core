@@ -10,3 +10,6 @@
 [submodule "Cmdr"]
 	path = Cmdr
 	url = https://github.com/evaera/Cmdr.git
+[submodule "Replica"]
+	path = Replica
+	url = https://github.com/MadStudioRoblox/Replica.git
