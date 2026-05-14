@@ -7,3 +7,6 @@
 [submodule "ProfileStore"]
 	path = ProfileStore
 	url = https://github.com/MadStudioRoblox/ProfileStore.git
+[submodule "Cmdr"]
+	path = Cmdr
+	url = https://github.com/evaera/Cmdr.git
