@@ -9,6 +9,7 @@ local ServerStorage = game:GetService("ServerStorage")
 -- ### Modules
 local Player = require(ReplicatedStorage.Source.CoreModules.Player)
 local ProfileService = require(ServerStorage.Source.ProfileService)
+local ProfileStore = require(ServerStorage.Source.ProfileStore)
 local Core = require(ReplicatedStorage.Source.CoreModules.Core)
 local Reflex = require(ReplicatedStorage.Source.Packages.reflex)
 
@@ -52,7 +53,8 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
 
     local profileTemplate = RootProducer.createDataTemplate()
 
-    local playerProfileStore = ProfileService.GetProfileStore(databaseName, profileTemplate)
+    --local playerProfileStore = ProfileService.GetProfileStore(databaseName, profileTemplate)
+    local playerProfileStore2 = ProfileStore.New(databaseName, profileTemplate)
     
     local function clearPlayer(player)
         if self.troves[player] ~= nil then
@@ -64,82 +66,58 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
     Player.onPlayerAdded(function(player)
         self.troves[player] = Trove.new()
 
-        local profileKey = `Player_{player.UserId}`
+        --local profile = playerProfileStore:LoadProfileAsync(`Player_{player.UserId}`, "ForceLoad")
+        local profile2 = playerProfileStore2:StartSessionAsync(`Player_{player.UserId}`, {
+            Cancel = function()
+                return player.Parent ~= Players
+            end
+        })
 
-        local profile = playerProfileStore:LoadProfileAsync(profileKey, "ForceLoad")
-        if profile == nil then
+
+        if profile2 ~= nil then
+            profile2:AddUserId(player.UserId)
+            profile2:Reconcile()
+
+            if loadMiddleware ~= nil then
+                profile2 = loadMiddleware(profile2)
+            end
+
+            profile2.Data = RootProducer.fixUserData(profile2.Data)
+
+            profile2.OnSessionEnd:Connect(function()
+                clearPlayer(player)
+                player:Kick(`Profile session end - Please rejoin`)
+            end)
+
+            if player.Parent == Players then
+                self.profiles[player] = profile2
+                print(`Profile loaded for {player.DisplayName}!`)
+
+                --cleanup
+                self.troves[player]:Add(function()
+                    local _profile = self.profiles[player]
+                    if _profile ~= nil then
+                        self.signals.beforePlayerRemoving:Fire(player)
+                        _profile:EndSession()
+                    end
+                    self.profiles[player] = nil
+                    Fusion.doCleanup(self.scopes[player])
+                    self.states[player] = nil
+                    self.scopes[player] = nil
+                end)
+
+                self.signals.playerProfileLoaded:Fire(player, profile2.Data)
+             else
+                -- The player has left before the profile session started
+                profile2:EndSession()
+                clearPlayer(player)
+             end
+
+        else
             player:Kick("Failed to load saved data. Please rejoin")
             clearPlayer(player)
-            return
         end
 
-        -- check if actually need a rollback before checking history
-        local needsRollback = RootProducer.doesCurrentProfileNeedRollback(profile)
-
-        if needsRollback then
-            local rollbackQueryResult = RootProducer.getLatestValidProfile(playerProfileStore, profileKey)
-            
-            if rollbackQueryResult.status == RootProducer.RollbackQueryStatus.FOUND_VALID_PROFILE then
-                local latestValidProfile = rollbackQueryResult.profile
-                profile.Data = TableUtil.Copy(latestValidProfile.Data, true)
-                profile:Save()
-
-            elseif rollbackQueryResult.status == RootProducer.RollbackQueryStatus.NO_VALID_PROFILE_FOUND then
-                profile.Data = TableUtil.Copy(RootProducer.createDataTemplate(), true)
-                profile:Save()
-
-            elseif rollbackQueryResult.status == RootProducer.RollbackQueryStatus.QUERY_FAILED then
-                player:Kick("Failed fixing your save data, please rejoin")
-                clearPlayer(player)
-                return
-            end
-        end
-
-        -- fix save
-        profile:Reconcile()
-        if loadMiddleware ~= nil then
-            profile = loadMiddleware(profile)
-        end
-
-        if RunService:IsStudio() then
-            profile.Data = RootProducer.studioModifyUserData(profile.Data)
-        end
-        profile.Data = RootProducer.fixUserData(profile.Data)
-
-        -- add a variable to get a reward later 
-        if needsRollback then
-            profile.Data.general.rollbackReward += 1
-        end
-
-        -- if player leave or profile is loaded on another server
-        profile:ListenToRelease(function()
-            player:Kick("Your profile has been loaded remotely. Please rejoin")
-            clearPlayer(player)
-        end)
-
-        -- release if data is loaded but player already left
-        if not player:IsDescendantOf(Players) then
-            profile:Release()
-            clearPlayer(player)
-            return
-        end
-
-        self.profiles[player] = profile
-
-        --cleanup
-        self.troves[player]:Add(function()
-            local _profile = self.profiles[player]
-            if _profile ~= nil then
-                self.signals.beforePlayerRemoving:Fire(player)
-                _profile:Release()
-            end
-            self.profiles[player] = nil
-            Fusion.doCleanup(self.scopes[player])
-            self.states[player] = nil
-            self.scopes[player] = nil
-        end)
-
-        self.signals.playerProfileLoaded:Fire(player, profile.Data)
     end)
 
     Player.onPlayerRemoving(function(player)
