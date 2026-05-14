@@ -66,8 +66,10 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
     Player.onPlayerAdded(function(player)
         self.troves[player] = Trove.new()
 
+        local profileKey = `Player_{player.UserId}`
+
         --local profile = playerProfileStore:LoadProfileAsync(`Player_{player.UserId}`, "ForceLoad")
-        local profile2 = playerProfileStore2:StartSessionAsync(`Player_{player.UserId}`, {
+        local profile2 = playerProfileStore2:StartSessionAsync(profileKey, {
             Cancel = function()
                 return player.Parent ~= Players
             end
@@ -76,12 +78,38 @@ function PlayerDataManager.Init(databaseName: string, loadMiddleware: (table) ->
 
         if profile2 ~= nil then
             profile2:AddUserId(player.UserId)
+
+            -- check if actually need a rollback before checking history
+            local needsRollback = RootProducer.doesCurrentProfileNeedRollback(profile2)
+
+            if needsRollback then
+                local rollbackQueryResult = RootProducer.getLatestValidProfile(playerProfileStore2, profileKey)
+                
+                if rollbackQueryResult.status == RootProducer.RollbackQueryStatus.FOUND_VALID_PROFILE then
+                    local latestValidProfile = rollbackQueryResult.profile
+                    profile2.Data = TableUtil.Copy(latestValidProfile.Data, true)
+                    profile2:Save()
+
+                elseif rollbackQueryResult.status == RootProducer.RollbackQueryStatus.NO_VALID_PROFILE_FOUND then
+                    profile2.Data = TableUtil.Copy(RootProducer.createDataTemplate(), true)
+                    profile2:Save()
+
+                elseif rollbackQueryResult.status == RootProducer.RollbackQueryStatus.QUERY_FAILED then
+                    player:Kick("Failed fixing your save data, please rejoin")
+                    clearPlayer(player)
+                    return
+                end
+            end
+
             profile2:Reconcile()
 
             if loadMiddleware ~= nil then
                 profile2 = loadMiddleware(profile2)
             end
 
+            if RunService:IsStudio() then
+                profile2.Data = RootProducer.studioModifyUserData(profile2.Data)
+            end
             profile2.Data = RootProducer.fixUserData(profile2.Data)
 
             profile2.OnSessionEnd:Connect(function()
